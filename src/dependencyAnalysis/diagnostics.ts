@@ -36,7 +36,7 @@ class DiagnosticsPipeline extends AbstractDiagnosticsPipeline<DependencyData> {
      * @param ecosystem - The name of the ecosystem in which dependencies are being analyzed.
      */
     runDiagnostics(dependencies: Map<string, DependencyData[]>, ecosystem: string) {
-        Object.entries(dependencies).map(([ref, dependencyData]: [string, DependencyData[]]) => {
+        dependencies.forEach((dependencyData, ref) => {
             const dependencyRef = ecosystem === GRADLE ? ref : ref.split('@')[0];
             const dependency = this.dependencyMap.get(dependencyRef);
 
@@ -91,7 +91,7 @@ class DiagnosticsPipeline extends AbstractDiagnosticsPipeline<DependencyData> {
  */
 async function performDiagnostics(diagnosticFilePath: Uri, contents: string, provider: IDependencyProvider) {
     try {
-        const dependencies = await provider.collect(contents);
+        const dependencies = provider.collect(contents);
         const ecosystem = provider.getEcosystem();
         const dependencyMap = new DependencyMap(dependencies, ecosystem);
 

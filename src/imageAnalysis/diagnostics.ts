@@ -33,7 +33,7 @@ class DiagnosticsPipeline extends AbstractDiagnosticsPipeline<ImageData> {
      * @param images - A map containing image data by reference string.
      */
     runDiagnostics(images: Map<string, ImageData[]>) {
-        Object.entries(images).map(([ref, imageData]: [string, ImageData[]]) => {
+        images.forEach((imageData, ref) => {
             const foundImageList = this.imageMap.get(ref);
 
             foundImageList.forEach(image => {
