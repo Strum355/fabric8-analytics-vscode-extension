@@ -2,6 +2,7 @@
 
 import * as vscode from 'vscode';
 import exhort, { ImageRef, parseImageRef } from '@trustification/exhort-javascript-api';
+import { type Options } from '@trustification/exhort-javascript-api';
 
 import { IImageRef, IOptions } from './imageAnalysis';
 
@@ -26,7 +27,7 @@ async function imageAnalysisService(images: IImageRef[], html: boolean, options:
  * @param options Additional options for the analysis.
  * @returns A promise resolving to the stack analysis report in HTML format.
  */
-async function stackAnalysisService(pathToManifest: string, options: object): Promise<string> {
+async function stackAnalysisService(pathToManifest: string, options: Options): Promise<string> {
   // Get stack analysis in HTML format
   return await exhort.stackAnalysis(pathToManifest, true, options);
 }

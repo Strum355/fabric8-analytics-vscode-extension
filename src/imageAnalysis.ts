@@ -9,21 +9,19 @@ import { StatusMessages, Titles } from './constants';
 import { updateCurrentWebviewPanel } from './rhda';
 import { buildErrorMessage } from './utils';
 import { DepOutputChannel } from './depOutputChannel';
+import { type Options } from '@trustification/exhort-javascript-api';
 
 /**
  * Represents options for image analysis.
  */
-interface IOptions {
-    RHDA_TOKEN: string;
-    RHDA_SOURCE: string;
-    EXHORT_SYFT_PATH: string;
-    EXHORT_SYFT_CONFIG_PATH: string;
-    EXHORT_SKOPEO_PATH: string;
-    EXHORT_SKOPEO_CONFIG_PATH: string;
-    EXHORT_DOCKER_PATH: string;
-    EXHORT_PODMAN_PATH: string;
-    EXHORT_IMAGE_PLATFORM: string;
-}
+// eslint-disable-next-line @typescript-eslint/naming-convention
+type IOptions = Required<Pick<
+    Options,
+    'RHDA_TOKEN' | 'RHDA_SOURCE' |
+    'EXHORT_SYFT_PATH' | 'EXHORT_SYFT_CONFIG_PATH' |
+    'EXHORT_SKOPEO_PATH' | 'EXHORT_SKOPEO_CONFIG_PATH' |
+    'EXHORT_DOCKER_PATH' | 'EXHORT_PODMAN_PATH' | 'EXHORT_IMAGE_PLATFORM'
+>> & Options;
 
 /**
  * Represents a reference to an image.
