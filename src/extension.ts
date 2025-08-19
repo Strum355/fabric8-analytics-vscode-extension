@@ -243,7 +243,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const disposableLLMAnalysisReportCommand = vscode.commands.registerCommand(
     commands.LLM_MODELS_ANALYSIS_REPORT,
     async (model: string, uri: vscode.Uri, range: vscode.Range) => {
-      LLMAnalysisReportPanel.createOrShowPanel();
+      LLMAnalysisReportPanel.createOrShowPanel(context);
       // remove null check, better missing handling
       await LLMAnalysisReportPanel.currentPanel?.updatePanel(modelsInDocs.get(uri)!.get(range)!.id);
       record(context, TelemetryActions.llmAnalysisReportDone, { modelName: model });

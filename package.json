@@ -398,6 +398,7 @@
     "@types/mocha": "^10.0.2",
     "@types/mustache": "^4.2.6",
     "@types/node": "^20.8.4",
+    "@types/react-dom": "^19.1.7",
     "@types/sinon": "^10.0.19",
     "@types/sinon-chai": "^3.0.0",
     "@types/vscode": "^1.76.0",
@@ -409,6 +410,7 @@
     "chai": "^4.3.10",
     "chai-subset": "^1.6.0",
     "copy-webpack-plugin": "^13.0.0",
+    "css-loader": "^7.1.2",
     "decache": "^4.6.2",
     "eslint": "^8.51.0",
     "glob": "^11.0.2",
@@ -426,9 +428,13 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "@patternfly/react-charts": "^8.3.1",
+    "@patternfly/react-core": "^6.3.1",
+    "@patternfly/react-table": "^6.3.1",
     "@redhat-developer/vscode-redhat-telemetry": "^0.8.0",
     "@trustification/exhort-api-spec": "^1.0.18",
     "@trustification/exhort-javascript-api": "^0.2.4-ea.9",
+    "@types/vscode-webview": "^1.57.5",
     "@xml-tools/ast": "^5.0.5",
     "@xml-tools/parser": "^1.0.11",
     "cli-table3": "^0.6.5",
@@ -437,7 +443,11 @@
     "minimatch": "^10.0.3",
     "mustache": "^4.2.0",
     "path": "^0.12.7",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "tree-sitter-python": "^0.23.6",
+    "victory": "^37.3.6",
+    "victory-core": "^37.3.6",
     "web-tree-sitter": "^0.25.6"
   }
 }

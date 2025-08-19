@@ -1,14 +1,15 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "lib": ["es2022"],
+    "lib": ["es2022", "DOM"],
     "module": "commonjs",
     "moduleResolution": "node",
     "outDir": "out",
     "sourceMap": true,
     "rootDir": ".",
     "skipLibCheck": true,
-    "strict": true
+    "strict": true,
+    "jsx": "react-jsx"
   },
   "exclude": [
     "node_modules",
