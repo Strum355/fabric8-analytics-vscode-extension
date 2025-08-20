@@ -58,7 +58,8 @@ module.exports = [{
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'react.js',
-    libraryTarget: 'commonjs',
+    libraryTarget: 'var',
+    library: 'LLMAnalysisReport',
   },
   devtool: 'inline-source-map',
   externals: {

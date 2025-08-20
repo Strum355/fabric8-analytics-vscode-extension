@@ -467,20 +467,20 @@ function LLMAnalysisReportPage(props: { modelID: string }): JSX.Element {
             <Accordion asDefinitionList={false}>
               {reportData.guardrails.map((guardrail) => (
                 <AccordionItem
-                  key={`guardrail-item-` + guardrail.id}
+                  key={`guardrail-item-${guardrail.id}`}
                   isExpanded={
-                    expandedGuardrail === 'guardrail-toggle-' + guardrail.id
+                    expandedGuardrail === `guardrail-toggle-${guardrail.id}`
                   }
                 >
                   <AccordionToggle
-                    onToggle={() => {
-                      onToggle('guardrail-toggle-' + guardrail.id);
+                    onClick={() => {
+                      onToggle(`guardrail-toggle-${guardrail.id}`);
                     }}
-                    id={'guardrail-toggle-' + guardrail.id}
+                    id={`guardrail-toggle-${guardrail.id}`}
                   >
                     {guardrail.name}
                   </AccordionToggle>
-                  <AccordionContent id={'guardrail-expand-' + guardrail.id}>
+                  <AccordionContent id={`guardrail-expand-${guardrail.id}`}>
                     <p>{guardrail.description}</p>
                   </AccordionContent>
                 </AccordionItem>

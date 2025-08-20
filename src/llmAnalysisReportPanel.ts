@@ -90,6 +90,7 @@ export class LLMAnalysisReportPanel {
         <html lang="en">
           <head>
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src https://unpkg.com 'unsafe-inline'; font-src https://unpkg.com; script-src ${this._panel.webview.cspSource} 'unsafe-eval'; img-src data: https:; connect-src https:;">
             <link
               rel="stylesheet"
               href="https://unpkg.com/@patternfly/patternfly@6/patternfly.css"
