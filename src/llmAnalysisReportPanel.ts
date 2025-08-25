@@ -81,8 +81,6 @@ export class LLMAnalysisReportPanel {
     LLMAnalysisReportPanel.currentPanel = new LLMAnalysisReportPanel(context, column);
   }
 
-
-
   public async updatePanel(modelID: string) {
     const scriptSrc = this._panel.webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'react.js'));
 

@@ -112,7 +112,9 @@ interface EnrichedGuardrail {
   improvedMetrics: Array<{ taskName: string; metricName: string }>;
 }
 
-function getImpactLevel(metric: any): string {
+function getImpactLevel(
+  metric: ModelCardResponse['tasks'][0]['metrics'][0]
+): string {
   if (!metric.thresholds || metric.thresholds.length === 0) {
     return 'unknown';
   }
@@ -433,7 +435,7 @@ function LLMAnalysisReportPage(props: { modelID: string }): JSX.Element {
         <Card isFullHeight isLarge>
           <CardTitle>Evaluation task details</CardTitle>
           <CardBody>
-            <Table>
+            <Table isExpandable>
               <Thead>
                 <Tr>
                   <Th>Task Name</Th>
@@ -443,9 +445,11 @@ function LLMAnalysisReportPage(props: { modelID: string }): JSX.Element {
                 </Tr>
               </Thead>
               <Tbody>
-                {reportData.taskData.map((task) => (
+                {reportData.taskData.map((task, rowIdx) => (
                   <Tr key={task.taskName}>
-                    <Td>{task.taskName}</Td>
+                    <Td expand={{ rowIndex: rowIdx, isExpanded: true }}>
+                      {task.taskName}
+                    </Td>
                     <Td>{task.desc}</Td>
                     <Td>{task.tags}</Td>
                   </Tr>
