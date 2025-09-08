@@ -19,6 +19,9 @@
 				"${workspaceFolder}/dist/*.js"
 			],
 			"preLaunchTask": "npm: webpack-dev",
+			"env": {
+				"EXHORT_DEV_MODE": "true",
+			}
 		},
 		{
 			"name": "Launch Tests",

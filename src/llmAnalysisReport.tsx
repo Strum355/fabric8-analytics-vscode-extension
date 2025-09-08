@@ -8,6 +8,7 @@ import {
   CardTitle,
   Gallery,
   GalleryItem,
+  Masthead,
   Page,
   PageSection,
 } from '@patternfly/react-core';
@@ -82,10 +83,12 @@ interface ReportData {
   }[];
   metricsData: {
     impactLevel: string;
+    impactDisplayName: string;
     name: string;
     value: number;
   }[];
   impactLevels: string[];
+  impactDisplayNames: string[];
   guardrails: {
     improvedMetrics: {
       taskName: string;
@@ -122,14 +125,7 @@ function getImpactLevel(
   const score = metric.score;
   for (const threshold of metric.thresholds) {
     if (score >= threshold.lower && score <= threshold.upper) {
-      // Map threshold categories to impact levels
-      if (threshold.category <= 2) {
-        return 'low';
-      }
-      if (threshold.category <= 4) {
-        return 'moderate';
-      }
-      return 'high';
+      return threshold.impact;
     }
   }
   return 'unknown';
@@ -137,16 +133,41 @@ function getImpactLevel(
 
 // function getImpactColor(impactLevel: string): string {
 //   switch (impactLevel) {
+//     case 'no_measurable':
+//       return '#C8E6C9'; // Visible light green
+//     case 'very_low':
+//       return '#26A69A'; // Blue-green
 //     case 'low':
-//       return '#4CAF50'; // Green
+//       return '#8BC34A'; // Light green
 //     case 'moderate':
 //       return '#FF9800'; // Orange
 //     case 'high':
+//       return '#FF5722'; // Red-orange
+//     case 'severe':
 //       return '#F44336'; // Red
 //     default:
 //       return '#9E9E9E'; // Gray
 //   }
 // }
+
+function getImpactDisplayName(impactLevel: string): string {
+  switch (impactLevel) {
+    case 'no_measurable':
+      return 'No Measurable Impact';
+    case 'very_low':
+      return 'Very Low';
+    case 'low':
+      return 'Low';
+    case 'moderate':
+      return 'Moderate';
+    case 'high':
+      return 'High';
+    case 'severe':
+      return 'Severe';
+    default:
+      return 'Unknown';
+  }
+}
 
 function getRecommendedGuardrails(
   tasks: ModelCardResponse['tasks'],
@@ -237,10 +258,15 @@ function LLMAnalysisReportPage(props: { modelID: string }): JSX.Element {
     // Sort by required metrics first, then by impact level
     allMetrics.sort((a, b) => {
       const impactOrder: { [key: string]: number } = {
-        high: 0,
-        moderate: 1,
-        low: 2,
-        unknown: 3,
+        severe: 0,
+        high: 1,
+        moderate: 2,
+        low: 3,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        very_low: 4,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        no_measurable: 5,
+        unknown: 6,
       };
       return impactOrder[a.impactLevel] - impactOrder[b.impactLevel];
     });
@@ -260,6 +286,7 @@ function LLMAnalysisReportPage(props: { modelID: string }): JSX.Element {
     modelCardResponse.tasks.forEach((task) => {
       task.metrics.forEach((metric) => {
         const metricKey = `${task.name}:${metric.name}`;
+
         if (metric.guardrails) {
           metricToGuardrails.set(metricKey, metric.guardrails);
 
@@ -298,6 +325,7 @@ function LLMAnalysisReportPage(props: { modelID: string }): JSX.Element {
           categories: metric.categories,
           higherIsBetter: metric.higher_is_better,
           impactLevel: getImpactLevel(metric),
+          impactDisplayName: getImpactDisplayName(getImpactLevel(metric)),
           relatedGuardrails: relatedGuardrailIds
             .filter((id) => recommendedGuardrails.some((g) => g.id === id))
             .map((id) => {
@@ -324,20 +352,24 @@ function LLMAnalysisReportPage(props: { modelID: string }): JSX.Element {
       transformersVersion: modelCardResponse.config.transformers_version,
       lmEvalVersion: modelCardResponse.config.lm_eval_version,
       impactLevels: Array.from(new Set(allMetrics.map((m) => m.impactLevel))),
+      impactDisplayNames: Array.from(
+        new Set(allMetrics.map((m) => getImpactDisplayName(m.impactLevel)))
+      ),
       taskData: enrichedTasks,
       metricsData: enrichedTasks.flatMap((task) =>
         task.metrics.map((metric) => ({
           impactLevel: metric.impactLevel,
+          impactDisplayName: metric.impactDisplayName,
           name: metric.name,
           value: metric.score,
         }))
       ),
       guardrails: enrichedGuardrails,
-    };
+    } as ReportData;
   }, [modelCardResponse]);
 
   const [expandedGuardrail, setExpandedGuardrail] = useState('');
-  const onToggle = (id: string) => {
+  const onToggleExpandGuardrail = (id: string) => {
     if (id === expandedGuardrail) {
       setExpandedGuardrail('');
     } else {
@@ -345,8 +377,17 @@ function LLMAnalysisReportPage(props: { modelID: string }): JSX.Element {
     }
   };
 
+  const [expandedTaskDetails, setExpandedTaskDetails] = useState('');
+  const onToggleExpandedTaskDetails = (id: string) => {
+    if (id === expandedTaskDetails) {
+      setExpandedTaskDetails('');
+    } else {
+      setExpandedTaskDetails(id);
+    }
+  };
+
   return reportData ? (
-    <Page>
+    <Page masthead={<Masthead />}>
       <PageSection>
         <h1 className="pf-v6-u-font-weight-bold pf-t--global--font--size--heading--h1 pf-v6-u-font-size-4xl">
           Red Hat LLM Analysis Report
@@ -405,7 +446,7 @@ function LLMAnalysisReportPage(props: { modelID: string }): JSX.Element {
               themeColor={ChartThemeColor.multi}
               horizontal
               domain={{ y: [0, 1] }}
-              legendData={reportData.impactLevels.map((level) => ({
+              legendData={reportData.impactDisplayNames.map((level) => ({
                 name: level,
               }))}
               padding={{
@@ -420,7 +461,7 @@ function LLMAnalysisReportPage(props: { modelID: string }): JSX.Element {
               <ChartBar
                 data={reportData.metricsData.map((data) => {
                   return {
-                    name: data.impactLevel,
+                    name: data.impactDisplayName,
                     y: data.value,
                     x: data.name,
                   };
@@ -438,6 +479,7 @@ function LLMAnalysisReportPage(props: { modelID: string }): JSX.Element {
             <Table isExpandable>
               <Thead>
                 <Tr>
+                  <Th screenReaderText="Row expansion" />
                   <Th>Task Name</Th>
                   <Th>Description</Th>
                   <Th>Tags</Th>
@@ -447,7 +489,15 @@ function LLMAnalysisReportPage(props: { modelID: string }): JSX.Element {
               <Tbody>
                 {reportData.taskData.map((task, rowIdx) => (
                   <Tr key={task.taskName}>
-                    <Td expand={{ rowIndex: rowIdx, isExpanded: true }}>
+                    <Td
+                      expand={{
+                        rowIndex: rowIdx,
+                        isExpanded: true,
+                        onToggle: () => {
+                          onToggleExpandedTaskDetails('asdf');
+                        },
+                      }}
+                    >
                       {task.taskName}
                     </Td>
                     <Td>{task.desc}</Td>
@@ -478,7 +528,9 @@ function LLMAnalysisReportPage(props: { modelID: string }): JSX.Element {
                 >
                   <AccordionToggle
                     onClick={() => {
-                      onToggle(`guardrail-toggle-${guardrail.id}`);
+                      onToggleExpandGuardrail(
+                        `guardrail-toggle-${guardrail.id}`
+                      );
                     }}
                     id={`guardrail-toggle-${guardrail.id}`}
                   >
@@ -495,13 +547,13 @@ function LLMAnalysisReportPage(props: { modelID: string }): JSX.Element {
       </PageSection>
     </Page>
   ) : (
-    <Page>
+    <>
       <PageSection>
         <h1 className="pf-v6-u-font-weight-bold pf-t--global--font--size--heading--h1 pf-v6-u-font-size-4xl">
           Loading LLM data...
         </h1>
       </PageSection>
-    </Page>
+    </>
   );
 }
 
