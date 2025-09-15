@@ -12,7 +12,15 @@ import {
   Page,
   PageSection,
 } from '@patternfly/react-core';
-import { Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
+import {
+  Table,
+  Thead,
+  Tr,
+  Th,
+  Tbody,
+  Td,
+  ExpandableRowContent,
+} from '@patternfly/react-table';
 import {
   Chart,
   ChartAxis,
@@ -80,6 +88,18 @@ interface ReportData {
     taskName: string;
     desc: string;
     tags: string;
+    metrics: {
+      name: string;
+      score: number;
+      categories: string[];
+      higherIsBetter: boolean;
+      impactLevel: string;
+      impactDisplayName: string;
+      relatedGuardrails: ({
+        id: number;
+        name: string;
+      } | null)[];
+    }[];
   }[];
   metricsData: {
     impactLevel: string;
@@ -240,7 +260,7 @@ function LLMAnalysisReportPage(props: { modelID: string }): JSX.Element {
     });
   }, [props.modelID]);
 
-  const reportData: ReportData | undefined = useMemo(() => {
+  const reportData = useMemo((): ReportData | undefined => {
     if (!modelCardResponse) {
       return undefined;
     }
@@ -365,7 +385,7 @@ function LLMAnalysisReportPage(props: { modelID: string }): JSX.Element {
         }))
       ),
       guardrails: enrichedGuardrails,
-    } as ReportData;
+    };
   }, [modelCardResponse]);
 
   const [expandedGuardrail, setExpandedGuardrail] = useState('');
@@ -425,6 +445,12 @@ function LLMAnalysisReportPage(props: { modelID: string }): JSX.Element {
               <GalleryItem>
                 <div className="pf-v6-u-font-weight-bold">LM-Eval version</div>
                 <div>{reportData.lmEvalVersion}</div>
+              </GalleryItem>
+              <GalleryItem>
+                <div className="pf-v6-u-font-weight-bold">Github link</div>
+                <a href="https://github.com/trustification/red-hat-dependency-analytics/issues/1">
+                  https://github.com/trustification/red-hat-dependency-analytics/issues/1
+                </a>
               </GalleryItem>
             </Gallery>
           </CardBody>
@@ -486,15 +512,23 @@ function LLMAnalysisReportPage(props: { modelID: string }): JSX.Element {
                   {/* <Th>Actions</Th> */}
                 </Tr>
               </Thead>
-              <Tbody>
-                {reportData.taskData.map((task, rowIdx) => (
-                  <Tr key={task.taskName}>
+              {reportData.taskData.map((task, rowIdx) => (
+                <Tbody
+                  isExpanded={expandedTaskDetails === `task-details-${rowIdx}`}
+                >
+                  <Tr
+                    key={task.taskName}
+                    isContentExpanded={
+                      expandedTaskDetails === `task-details-${rowIdx}`
+                    }
+                  >
                     <Td
                       expand={{
                         rowIndex: rowIdx,
-                        isExpanded: true,
+                        isExpanded:
+                          expandedTaskDetails === `task-details-${rowIdx}`,
                         onToggle: () => {
-                          onToggleExpandedTaskDetails('asdf');
+                          onToggleExpandedTaskDetails(`task-details-${rowIdx}`);
                         },
                       }}
                     >
@@ -503,8 +537,49 @@ function LLMAnalysisReportPage(props: { modelID: string }): JSX.Element {
                     <Td>{task.desc}</Td>
                     <Td>{task.tags}</Td>
                   </Tr>
-                ))}
-              </Tbody>
+                  <Tr
+                    isExpanded={
+                      expandedTaskDetails === `task-details-${rowIdx}`
+                    }
+                  >
+                    <Td colSpan={4}>
+                      <ExpandableRowContent>
+                        <Table variant="compact">
+                          <Thead>
+                            <Tr>
+                              <Th>Metric</Th>
+                              <Th>Score</Th>
+                              <Th>Impact</Th>
+                              <Th>Categories</Th>
+                              <Th>Guardrails</Th>
+                            </Tr>
+                          </Thead>
+                          <Tbody>
+                            {task.metrics.map((metric, metricIdx) => (
+                              <Tr
+                                key={`${task.taskName}-${metric.name}-${metricIdx}`}
+                              >
+                                <Td>{metric.name}</Td>
+                                <Td>{metric.score.toFixed(3)}</Td>
+                                <Td>{metric.impactDisplayName}</Td>
+                                <Td>{metric.categories.join(', ')}</Td>
+                                <Td>
+                                  {metric.relatedGuardrails.length > 0
+                                    ? metric.relatedGuardrails
+                                        .map((guardrail) => guardrail?.name)
+                                        .filter(Boolean)
+                                        .join(', ')
+                                    : 'None'}
+                                </Td>
+                              </Tr>
+                            ))}
+                          </Tbody>
+                        </Table>
+                      </ExpandableRowContent>
+                    </Td>
+                  </Tr>
+                </Tbody>
+              ))}
             </Table>
           </CardBody>
         </Card>
